@@ -148,5 +148,4 @@ To use real JPL ephemerides, install `spiceypy`, load DE430 kernels, and pass a
 ## Note on mock data
 
 The example spacecraft data used in the public examples is **completely
-fictitious**. No ESA, ESTEC, or proprietary vehicle data is intended to be
-included.
+fictitious**. 
