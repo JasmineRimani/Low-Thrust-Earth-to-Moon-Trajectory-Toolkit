@@ -186,29 +186,30 @@ def maneuver_efficiency(
     eta_a, eta_e, eta_i, eta_w, eta_raan : float
     """
     a, e, i, omega, raan, nu = coe
+    e_eff = float(np.clip(e, 0.0, 0.999))
+    denom = max(1.0 + e_eff * np.cos(nu), 1e-8)
 
     # Semi-major axis efficiency: proportional to radial velocity fraction
     v_circ  = np.sqrt(abs(mu / a)) if a > 0 else 0.0
-    factor  = np.sqrt((a / mu) * (1.0 - e) / (1.0 + e))
+    factor  = np.sqrt(max((a / mu) * (1.0 - e_eff) / (1.0 + e_eff), 0.0)) if a > 0 else 0.0
     eta_a   = enable.ka * v_circ * factor
 
     # Eccentricity efficiency
-    eta_e   = enable.ke * 2.0 * (1.0 + 2.0 * e * np.cos(nu) + np.cos(nu)**2) / (
-                  1.0 + e * np.cos(nu))
+    eta_e   = enable.ke * 2.0 * (1.0 + 2.0 * e_eff * np.cos(nu) + np.cos(nu)**2) / denom
 
     # Inclination efficiency (maximised when thrust is at 90° latitude arg)
     cos_arg = np.cos(omega + nu)
-    eta_i   = enable.ki * (abs(cos_arg) / (1.0 + e * np.cos(nu))) * (
-                  np.sqrt(1.0 - e**2 * np.sin(omega)**2)
-                  - e * abs(np.cos(omega)))
+    eta_i   = enable.ki * (abs(cos_arg) / denom) * (
+                  np.sqrt(max(1.0 - e_eff**2 * np.sin(omega)**2, 0.0))
+                  - e_eff * abs(np.cos(omega)))
 
     # RAAN efficiency
     sin_arg = np.sin(omega + nu)
-    eta_raan= enable.kraan * (abs(sin_arg) / (1.0 + e * np.cos(nu))) * (
-                  np.sqrt(1.0 - e**2 * np.cos(omega)**2)
-                  - e * abs(np.sin(omega)))
+    eta_raan= enable.kraan * (abs(sin_arg) / denom) * (
+                  np.sqrt(max(1.0 - e_eff**2 * np.cos(omega)**2, 0.0))
+                  - e_eff * abs(np.sin(omega)))
 
     # Argument of perigee efficiency (approximation)
-    eta_w   = enable.kw * 0.25 * (1.0 + np.sin(nu)**2) / (1.0 + e * np.cos(nu))
+    eta_w   = enable.kw * 0.25 * (1.0 + np.sin(nu)**2) / denom
 
     return eta_a, eta_e, eta_i, eta_w, eta_raan

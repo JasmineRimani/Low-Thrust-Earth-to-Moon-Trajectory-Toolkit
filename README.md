@@ -31,6 +31,13 @@ The repository also contains Moon-phase and CR3BP / NRHO extension code under
 `src/` and `src/cr3bp/`. That work is still in progress and is not yet treated
 as a supported end-to-end NRHO transfer workflow.
 
+An additional exploratory plotting example is provided in
+`examples/earth_to_llo_exploratory.py`. It saves a paper-style Earth-to-LLO
+mission profile, but the Moon-phase currently starts from a representative
+captured lunar ellipse rather than a validated Earth-to-Moon handoff, so it
+should be treated as an exploratory public demo rather than a reproduced
+end-to-end benchmark.
+
 ## Provenance And Boundaries
 
 - This repository is intended to contain only a public-literature-inspired Python implementation.
@@ -115,6 +122,7 @@ src/
   cr3bp/               experimental NRHO extension code
 examples/
   mock_mission.py       Supported Earth-phase worked example
+  earth_to_llo_exploratory.py  exploratory Earth-to-LLO plotting demo
 tests/
   test_magneto.py       Core propagation / perturbation / optimisation tests
 ```

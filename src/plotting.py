@@ -93,6 +93,10 @@ def save_trajectory_views(
     save_path.parent.mkdir(parents=True, exist_ok=True)
 
     main_points = np.asarray(trajectory, dtype=float) / scale
+    stride = max(1, len(main_points) // 3500)
+    plot_points = main_points[::stride]
+    stride = max(1, len(main_points) // 3500)
+    plot_points = main_points[::stride]
     ref_points = None
     if reference_trajectory is not None:
         ref_points = np.asarray(reference_trajectory, dtype=float) / scale
@@ -194,6 +198,95 @@ def save_trajectory_views(
 
     fig.suptitle(title, fontsize=13, fontweight="bold")
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
+    fig.savefig(save_path, dpi=dpi, bbox_inches="tight")
+    plt.close(fig)
+    return save_path
+
+
+def save_paper_style_transfer_plot(
+    trajectory: np.ndarray,
+    central_body_radius: float,
+    save_path: str | Path,
+    *,
+    title: str,
+    axis_unit_label: str,
+    scale: float,
+    reference_trajectory: np.ndarray | None = None,
+    body_color: str = "0.88",
+    transfer_color: str = "blue",
+    reference_color: str = "black",
+    body_alpha: float = 1.0,
+    dpi: int = 180,
+) -> Path:
+    """
+    Save a single 3-D Earth-centred transfer plot in a paper-like style.
+
+    This is useful when the intent is to show the transfer geometry against a
+    reference orbit, rather than a multi-view diagnostic plot.
+    """
+    save_path = Path(save_path)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    main_points = np.asarray(trajectory, dtype=float) / scale
+    stride = max(1, len(main_points) // 3500)
+    plot_points = main_points[::stride]
+    ref_points = None
+    if reference_trajectory is not None:
+        ref_points = np.asarray(reference_trajectory, dtype=float) / scale
+
+    radius = central_body_radius / scale
+    all_points = _combine_point_sets(main_points, ref_points, np.zeros((1, 3)))
+
+    fig = plt.figure(figsize=(8.4, 6.3))
+    ax = fig.add_subplot(111, projection="3d")
+
+    if ref_points is not None:
+        ax.plot(
+            ref_points[:, 0],
+            ref_points[:, 1],
+            ref_points[:, 2],
+            color=reference_color,
+            linewidth=1.8,
+            alpha=0.85,
+        )
+
+    ax.plot(
+        plot_points[:, 0],
+        plot_points[:, 1],
+        plot_points[:, 2],
+        color=transfer_color,
+        linewidth=0.65,
+        alpha=0.8,
+    )
+    ax.scatter(
+        main_points[0, 0],
+        main_points[0, 1],
+        main_points[0, 2],
+        color="tab:green",
+        s=18,
+        depthshade=False,
+        zorder=5,
+    )
+    ax.scatter(
+        main_points[-1, 0],
+        main_points[-1, 1],
+        main_points[-1, 2],
+        color="tab:red",
+        s=18,
+        depthshade=False,
+        zorder=5,
+    )
+
+    _plot_body_sphere(ax, radius, body_color, body_alpha)
+    _set_equal_limits_3d(ax, all_points, min_radius=radius)
+    ax.view_init(elev=18.0, azim=-122.0)
+    ax.set_xlabel(f"X coordinate ({axis_unit_label})")
+    ax.set_ylabel(f"Y coordinate ({axis_unit_label})")
+    ax.set_zlabel(f"Z coordinate ({axis_unit_label})")
+    ax.set_title(title, fontsize=12)
+    ax.grid(True, linestyle="--", alpha=0.35)
+
+    fig.tight_layout()
     fig.savefig(save_path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
     return save_path

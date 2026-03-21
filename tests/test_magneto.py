@@ -180,6 +180,8 @@ def test_earth_phase_runs_and_conserves_mass():
     # Mass should be monotonically decreasing
     assert np.all(np.diff(res.mass) <= 1e-6)
     assert res.mass[-1] < res.mass[0]
+    assert not res.converged
+    assert res.stop_reason == "time_limit_reached"
 
 
 def test_earth_phase_output_shapes():

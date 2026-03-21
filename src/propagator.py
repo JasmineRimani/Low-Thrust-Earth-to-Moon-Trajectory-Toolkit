@@ -16,7 +16,7 @@ propagators.
 
 from __future__ import annotations
 import numpy as np
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from scipy.integrate import solve_ivp
 
 from .constants import (
@@ -24,7 +24,7 @@ from .constants import (
     J2_EARTH, J2_MOON, G, OMEGA_MOON,
     R_SOI_MOON,
 )
-from .orbital_elements import coe2mee, mee2coe, mee2eci, eci2coe
+from .orbital_elements import coe2mee, mee2coe, mee2eci
 from .control import ControlWeights
 from .equations_of_motion import meeeqm_earth, meeeqm_moon
 
@@ -46,6 +46,8 @@ class PropagationResult:
     m_prop:       float = 0.0         # propellant consumed [kg]
     t_transfer:   float = 0.0         # transfer time [s]
     converged:    bool  = True
+    target_reached: bool = False      # target event reached
+    stop_reason:   str   = "completed"
 
 
 # ---------------------------------------------------------------------------
@@ -232,8 +234,16 @@ def propagate_earth_phase(
         max_step=3600.0,        # max 1-hour step
     )
 
-    return _build_result(sol, MU_EARTH, coe_initial, n_thrusters,
-                         thrust_per_thruster, isp)
+    return _build_result(
+        sol,
+        MU_EARTH,
+        coe_initial,
+        n_thrusters,
+        thrust_per_thruster,
+        isp,
+        event_names=["moon_soi_reached", "mass_depleted"],
+        target_event_index=0,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -266,13 +276,28 @@ def propagate_moon_phase(
     y0   = np.append(mee0, mass0)
     t_max = max_days * 86400.0
 
-    # Target reached when semi-major axis converges to target within 1%
-    a_target = coe_target_moon[0]
+    target_rp = coe_target_moon[0] * (1.0 - coe_target_moon[1])
+    target_ra = coe_target_moon[0] * (1.0 + coe_target_moon[1])
+    target_inc = coe_target_moon[2]
+
     def target_event(t, y):
         coe = mee2coe(y[:6])
-        return coe[0] - a_target
+        a, e, inc = coe[0], coe[1], coe[2]
+        if a <= 0.0 or e >= 0.999:
+            return 1.0
+
+        rp = a * (1.0 - e)
+        ra = a * (1.0 + e)
+        inc_err = abs(((inc - target_inc + np.pi) % (2.0 * np.pi)) - np.pi)
+
+        # Use periapsis/apoapsis closeness rather than semi-major axis alone so
+        # the stop event corresponds to an actual near-target lunar orbit.
+        rp_err = abs(rp - target_rp) / max(target_rp, 1.0)
+        ra_err = abs(ra - target_ra) / max(target_ra, 1.0)
+        inc_metric = inc_err / np.radians(5.0)
+        return max(rp_err / 0.03, ra_err / 0.03, inc_metric) - 1.0
     target_event.terminal  = True
-    target_event.direction = 1 if coe_initial_moon[0] < a_target else -1
+    target_event.direction = -1
 
     def mass_event(t, y):
         return y[6] - 1.0
@@ -305,8 +330,16 @@ def propagate_moon_phase(
         max_step=600.0,
     )
 
-    return _build_result(sol, MU_MOON, coe_initial_moon, n_thrusters,
-                         thrust_per_thruster, isp)
+    return _build_result(
+        sol,
+        MU_MOON,
+        coe_initial_moon,
+        n_thrusters,
+        thrust_per_thruster,
+        isp,
+        event_names=["target_orbit_reached", "mass_depleted"],
+        target_event_index=0,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -320,6 +353,9 @@ def _build_result(
     n_thrusters: int,
     thrust_per_thruster: float,
     isp: float,
+    *,
+    event_names: list[str] | None = None,
+    target_event_index: int = 0,
 ) -> PropagationResult:
     t    = sol.t
     mee  = sol.y[:6, :].T
@@ -338,11 +374,31 @@ def _build_result(
     # Tsiolkovsky ΔV (from propellant actually consumed)
     dv = isp * G * np.log(mass[0] / max(mass[-1], 1.0)) if mass[-1] > 1.0 else 0.0
 
+    if event_names is None:
+        event_names = []
+
+    target_reached = (
+        target_event_index < len(sol.t_events)
+        and len(sol.t_events[target_event_index]) > 0
+    )
+    stop_reason = "integration_failed"
+    if target_reached:
+        stop_reason = event_names[target_event_index] if target_event_index < len(event_names) else "target_reached"
+    elif any(len(events) > 0 for events in sol.t_events):
+        for index, events in enumerate(sol.t_events):
+            if len(events) > 0:
+                stop_reason = event_names[index] if index < len(event_names) else f"event_{index}"
+                break
+    elif sol.status == 0:
+        stop_reason = "time_limit_reached"
+
     return PropagationResult(
         t=t, mee=mee, mass=mass,
         coe=coe_h, r_eci=r_h, v_eci=v_h,
         delta_v=dv,
         m_prop=m_prop,
         t_transfer=t[-1] if len(t) > 0 else 0.0,
-        converged=sol.success or len(sol.t_events[0]) > 0,
+        converged=target_reached,
+        target_reached=target_reached,
+        stop_reason=stop_reason,
     )
