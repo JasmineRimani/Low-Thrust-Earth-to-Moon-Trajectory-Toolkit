@@ -4,6 +4,8 @@ Run with:  pytest tests/test_magneto.py -v
 """
 
 import sys, os
+from pathlib import Path
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import numpy as np
@@ -17,10 +19,16 @@ from src.perturbations import (
     srp_acceleration,
 )
 from src.control import ControlWeights, thrust_direction_lvlh
+from src.plotting import save_orbital_history_plot, save_trajectory_views
 from src.propagator import (
     propagate_earth_phase, propagate_moon_phase,
     make_earth_phase_third_body, make_moon_phase_third_body,
 )
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+TMP_PLOTS_DIR = REPO_ROOT / "tmp_plots"
+TMP_PLOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ---- Fixtures -------------------------------------------------------------
@@ -178,6 +186,7 @@ def test_earth_phase_output_shapes():
     coe_i = gto_coe()
     coe_f = moon_orbit_coe()
     enable = ControlWeights(ka=1.0, ke=0.0, ki=0.0, kw=0.0, kraan=0.0)
+    third_body = make_earth_phase_third_body()
 
     res = propagate_earth_phase(
         coe_i, coe_f, 500.0,
@@ -187,12 +196,42 @@ def test_earth_phase_output_shapes():
         smart_mode=False,
         max_days=3.0,
         rtol=1e-6, atol=1e-8,
+        get_third_body=third_body,
     )
     N = len(res.t)
     assert res.mee.shape  == (N, 6)
     assert res.coe.shape  == (N, 6)
     assert res.r_eci.shape == (N, 3)
     assert res.mass.shape  == (N,)
+
+    history_path = TMP_PLOTS_DIR / "test_earth_phase_history.png"
+    trajectory_path = TMP_PLOTS_DIR / "test_earth_phase_trajectory.png"
+    moon_track = np.array([third_body(t)[0] for t in res.t])
+
+    save_orbital_history_plot(
+        t_days=res.t / 86400.0,
+        coe=res.coe,
+        mass=res.mass,
+        save_path=history_path,
+        title="Test Earth-phase history (EP)",
+    )
+    save_trajectory_views(
+        trajectory=res.r_eci,
+        reference_trajectory=moon_track,
+        central_body_radius=R_EARTH,
+        save_path=trajectory_path,
+        title="Test Earth-phase trajectory (EP)",
+        axis_unit_label="10^3 km",
+        scale=1e6,
+        trajectory_label="Transfer trajectory",
+        reference_label="Moon ephemeris",
+        body_label="Earth",
+        body_color="steelblue",
+        end_label="Test end state",
+    )
+
+    assert history_path.is_file() and history_path.stat().st_size > 0
+    assert trajectory_path.is_file() and trajectory_path.stat().st_size > 0
 
 
 def test_moon_phase_runs():

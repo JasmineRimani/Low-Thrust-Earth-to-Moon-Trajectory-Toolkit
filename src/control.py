@@ -119,8 +119,12 @@ def thrust_direction_lvlh(
 
     # Argument of perigee
     tan_nu  = np.tan(nu_c) if abs(np.cos(nu_c)) > 1e-9 else np.inf
+    if not np.isfinite(tan_nu) or abs(tan_nu) < 1e-12:
+        tangential_term = np.copysign(1e12, 1.0 + e_c * np.cos(nu_c))
+    else:
+        tangential_term = (1.0 + e_c * np.cos(nu_c)) / tan_nu
     alpha_w = _safe(np.arctan2(
-        (1.0 + e_c * np.cos(nu_c)) / (tan_nu if np.isfinite(tan_nu) else 1e12),
+        tangential_term,
         2.0 + e_c * np.cos(nu_c),
     ))
     denom_w = ((np.sin(alpha_w - nu_c) * (1.0 + e_c * np.cos(nu_c))

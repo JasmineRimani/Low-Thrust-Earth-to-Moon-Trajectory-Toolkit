@@ -35,6 +35,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 
+REPORT_WIDTH = 70
+
 
 @dataclass
 class ValidationBound:
@@ -55,15 +57,21 @@ class ValidationBound:
         midpoint = 0.5 * (self.lo + self.hi)
         return 100.0 * (self.value - midpoint) / midpoint
 
-    def __str__(self) -> str:
-        status = "PASS ✓" if self.passed else "FAIL ✗"
+    @property
+    def status(self) -> str:
+        return "PASS ✓" if self.passed else "FAIL ✗"
+
+    def format_line(self) -> str:
         return (
-            f"  {status}  {self.name:<40s}"
+            f"  {self.status}  {self.name:<40s}"
             f"  computed={self.value:8.1f} {self.unit}"
             f"  lit=[{self.lo:.0f}, {self.hi:.0f}] {self.unit}"
             f"  err={self.pct_error:+.1f}%"
             f"  [{self.reference}]"
         )
+
+    def __str__(self) -> str:
+        return self.format_line()
 
 
 def validate_nrho_llo(
@@ -200,21 +208,31 @@ def validate_tsiolkovsky(
     )]
 
 
+def format_validation_report(checks: list[ValidationBound], title: str = "") -> str:
+    """Return a formatted validation report string."""
+    lines: list[str] = []
+
+    if title:
+        divider = "─" * REPORT_WIDTH
+        lines.extend(["", divider, f"  Validation: {title}", divider])
+
+    if not checks:
+        if title:
+            lines.append("  No validation checks available for this case.")
+        return "\n".join(lines)
+
+    passed_count = sum(check.passed for check in checks)
+    overall_pass = passed_count == len(checks)
+
+    lines.extend(check.format_line() for check in checks)
+    status = "ALL PASS ✓" if overall_pass else "SOME FAILED ✗"
+    lines.append(f"  → {status}  ({passed_count}/{len(checks)} checks)")
+    return "\n".join(lines)
+
+
 def print_validation_report(checks: list[ValidationBound], title: str = "") -> bool:
     """Print a formatted validation report. Returns True if all checks pass."""
-    if title:
-        print(f"\n{'─'*70}")
-        print(f"  Validation: {title}")
-        print(f"{'─'*70}")
-
-    all_pass = True
-    for c in checks:
-        print(c)
-        if not c.passed:
-            all_pass = False
-
-    if checks:
-        status = "ALL PASS ✓" if all_pass else "SOME FAILED ✗"
-        print(f"  → {status}  ({sum(c.passed for c in checks)}/{len(checks)} checks)")
-
-    return all_pass
+    report = format_validation_report(checks, title)
+    if report:
+        print(report)
+    return all(check.passed for check in checks)

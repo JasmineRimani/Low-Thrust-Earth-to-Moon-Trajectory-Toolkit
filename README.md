@@ -1,7 +1,8 @@
 # MAGNETO-Moon: Low-Thrust Earth-to-Moon Trajectory Analysis
 
 Python implementation of a low-thrust trajectory propagator for electric-propulsion
-spacecraft transferring from GTO to lunar orbit, with `scipy.optimize` weight tuning.
+spacecraft transferring from GTO toward the Moon, with `scipy.optimize`
+weight tuning.
 
 Companion to the publication:
 
@@ -12,7 +13,14 @@ Companion to the publication:
 
 ## What this code does
 
-Propagates a GTO → Moon SOI → NHRO low-thrust trajectory using:
+Currently, the implemented and validated workflow focuses on the first transfer
+leg:
+
+- **GTO → Moon SOI** low-thrust propagation
+- **Moon-centred low-thrust approach propagation** with the same MEE framework
+- **Lyapunov control-weight optimisation** for the Earth-phase transfer
+
+This is built using:
 
 - **Modified Equinoctial Elements** (MEE) as the state vector (singularity-free)
 - **Lyapunov feedback control** (Ruggiero et al. 2011) for thrust direction
@@ -20,6 +28,10 @@ Propagates a GTO → Moon SOI → NHRO low-thrust trajectory using:
 - Perturbations: J2, third-body (Moon + Sun), solar radiation pressure, drag
 
 And optionally optimises the Lyapunov control weights with `scipy.optimize.differential_evolution`.
+
+The repository also contains CR3BP / NRHO research code under `src/cr3bp/`.
+That extension is still in progress: NRHO transfer support is not yet
+implemented as a supported end-to-end MAGNETO workflow.
 
 ---
 
@@ -96,11 +108,18 @@ src/
   equations_of_motion.py  MEE ODEs (Earth + Moon phase)
   propagator.py         solve_ivp wrappers + mock ephemeris
   optimise.py           scipy.optimize weight tuner
+  plotting.py           shared plotting helpers for example scripts
 examples/
   mock_mission.py       Complete worked example (fictitious data)
 tests/
   test_magneto.py       15 pytest unit tests
 ```
+
+Example scripts save plots and summaries into `outputs/` so the repository root
+stays tidy.
+
+The NRHO-related dynamics and transfer files are currently experimental extension
+work and should not be treated as a finished implemented feature yet.
 
 ---
 
@@ -115,4 +134,4 @@ To use real JPL ephemerides, install `spiceypy`, load DE430 kernels, and pass a
 ## Note on mock data
 
 The example spacecraft ("Helios-1") uses **completely fictitious** geometry and
-mass properties. No real ESA vehicle data is included.
+mass properties. 
