@@ -1,1 +1,1 @@
-"""MAGNETO-Moon: Low-thrust Earth-to-Moon trajectory analysis in Python."""
+"""Low-thrust Earth-to-Moon mission analysis utilities in Python."""

@@ -57,9 +57,9 @@ OMEGA0_VEC: np.ndarray = np.array([0.0, 0.0, 1.0])
 # Reference state P_0_NRHO is at apolune (farthest point from Moon).
 # Period T_0_NRHO is computed numerically from this seed.
 #
-# These values are taken from published literature on the Gateway NRHO
+# These values are taken from published NRHO literature
 # (Zimovan-Spreen et al. 2020, Table 1; Capdevila 2014).
-# They are open-publication orbital mechanics data, not proprietary.
+# They are open-publication orbital mechanics data.
 # ---------------------------------------------------------------------------
 
 P_0_NRHO: np.ndarray = np.array([
@@ -74,10 +74,10 @@ P_0_NRHO: np.ndarray = np.array([
 # Approximate period — refined by numerical search below
 _T_0_NRHO_APPROX: float = 1.6323    # [CR3BP time]
 
-# Gateway canonical reference period (9:2 synodic resonance)
-GATEWAY_92_REFERENCE_PERIOD_DAYS: float = 6.5628  # [days]  from literature
-GATEWAY_92_REFERENCE_PERIOD_S: float = GATEWAY_92_REFERENCE_PERIOD_DAYS * 86400.0
-GATEWAY_92_REFERENCE_PERIOD_ND: float = GATEWAY_92_REFERENCE_PERIOD_S / T_SCALE
+# Canonical reference period (9:2 synodic resonance)
+REFERENCE_92_PERIOD_DAYS: float = 6.5628  # [days]  from literature
+REFERENCE_92_PERIOD_S: float = REFERENCE_92_PERIOD_DAYS * 86400.0
+REFERENCE_92_PERIOD_ND: float = REFERENCE_92_PERIOD_S / T_SCALE
 
 # ---------------------------------------------------------------------------
 # Integration step sizes  [CR3BP time]

@@ -3,7 +3,7 @@ Sphere-of-Influence (SOI) handoff utilities.
 
 Bridges the two propagation worlds:
 
-  MAGNETO  (ECI, two-body Moon-centred, SI units)
+  low-thrust propagator  (ECI, two-body Moon-centred, SI units)
       ↓  soi_to_cr3bp()
   CR3BP    (Earth-Moon rotating frame, dimensionless)
 
@@ -11,7 +11,7 @@ and back:
 
   CR3BP
       ↓  cr3bp_to_soi()
-  MAGNETO  (ECI SI)
+  low-thrust propagator  (ECI SI)
 
 The conversion accounts for:
 - Unit normalisation (SI → CR3BP dimensionless)
@@ -120,10 +120,10 @@ def magneto_soi_exit_to_cr3bp(
     t_epoch_nd: float = 0.0,
 ) -> np.ndarray:
     """
-    Extract the SOI-exit state from a MAGNETO ``PropagationResult`` and
+    Extract the SOI-exit state from a ``PropagationResult`` and
     convert it to a CR3BP state.
 
-    The MAGNETO Moon-phase propagator works in Moon-centred ECI (SI).
+    The Moon-phase propagator works in Moon-centred ECI (SI).
     This helper takes the *last* point of the propagation (= SOI boundary
     or target orbit) and hands it off to the CR3BP layer.
 

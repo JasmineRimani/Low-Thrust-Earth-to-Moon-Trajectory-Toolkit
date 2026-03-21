@@ -2,10 +2,10 @@
 Post-transfer ΔV corrections and mission-level utilities.
 
 Covers:
-- DOI (descent orbit insertion) burn sizing
+- DOI (descent orbit insertion) burn estimation
 - Circularisation ΔV from an elliptic ascent orbit
 - Small-angle phasing estimate
-- Gateway 9:2 NRHO mission-clock phasing diagnostics
+- 9:2 NRHO mission-clock phasing diagnostics
 - Propellant mass (Tsiolkovsky)
 """
 
@@ -109,11 +109,11 @@ def apply_dv_corrections(
 
 
 # ---------------------------------------------------------------------------
-# Gateway 9:2 NRHO phasing diagnostics
+# 9:2 NRHO phasing diagnostics
 # ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
-class GatewayPhasingDiagnostic:
+class RoundTripPhasingDiagnostic:
     """Mission-clock phasing state at the point the crew is back in LLO."""
 
     departure_epoch_s:            float
@@ -148,16 +148,16 @@ def _classify_phase_family(phi: float) -> str:
     return label
 
 
-def gateway_round_trip_phasing(
+def round_trip_phasing(
     departure_ta_nd: float,
     downleg_tof_s: float,
     descent_tof_s: float,
     surface_duration_s: float,
     ascent_tof_s: float,
     mission_period_s: float | None = None,
-) -> GatewayPhasingDiagnostic:
+) -> RoundTripPhasingDiagnostic:
     """
-    Build Gateway mission-clock phasing state at LLO readiness after ascent.
+    Build mission-clock phasing state at LLO readiness after ascent.
 
     Parameters
     ----------
@@ -166,12 +166,12 @@ def gateway_round_trip_phasing(
     descent_tof_s      : LLO→surface descent time [s].
     surface_duration_s : surface stay duration [s].
     ascent_tof_s       : surface→LLO ascent time [s].
-    mission_period_s   : reference Gateway period [s].
+    mission_period_s   : reference NRHO period [s].
                          Defaults to canonical 9:2 value (6.5628 days).
     """
-    from .cr3bp_dynamics import GATEWAY_92_REFERENCE_PERIOD_S
+    from .cr3bp_dynamics import REFERENCE_92_PERIOD_S
     if mission_period_s is None:
-        mission_period_s = GATEWAY_92_REFERENCE_PERIOD_S
+        mission_period_s = REFERENCE_92_PERIOD_S
 
     dep_s     = float(departure_ta_nd) * float(T_SCALE)
     elapsed   = (float(downleg_tof_s) + float(descent_tof_s)
@@ -183,7 +183,7 @@ def gateway_round_trip_phasing(
     frac      = offset_s / period_s
     wait_s    = (period_s - offset_s) % period_s
 
-    return GatewayPhasingDiagnostic(
+    return RoundTripPhasingDiagnostic(
         departure_epoch_s=dep_s,
         llo_ready_epoch_s=ready_s,
         llo_ready_ta_nd=ready_s / float(T_SCALE),

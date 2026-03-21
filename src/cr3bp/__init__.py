@@ -1,16 +1,18 @@
 """
 CR3BP-based NRHO ↔ LLO mission analysis tools.
 
-Extends the MAGNETO low-thrust propagator with the near-Moon phase:
-after the spacecraft enters the Moon's sphere of influence, this subpackage
-handles the transfer from/to the 9:2 NRHO and low lunar orbit (LLO).
+Experimental extension utilities for near-Moon dynamics.
+
+After the spacecraft enters the Moon's sphere of influence, this subpackage
+provides CR3BP helpers for analysis around the 9:2 NRHO and low lunar orbit
+(LLO).
 
 Key modules
 -----------
 cr3bp_dynamics   : CR3BP equations of motion, Jacobi constant, NRHO propagation.
 frames           : CR3BP / MCI / LVLH frame transforms.
 llo_state        : Circular LLO state in rotating frame with gradients.
-nrho_llo_transfer: NRHO ↔ LLO ΔV estimator — EP sizing grade, Tsiolkovsky fuel.
+nrho_llo_transfer: NRHO ↔ LLO preliminary transfer estimator.
 mission_utils    : ΔV corrections, phasing, Tsiolkovsky fuel accounting.
 initial_guess    : Three-strategy cascade initial-guess manager.
 """
@@ -41,8 +43,8 @@ from .mission_utils import (
     phasing_dv_ms,
     tsiolkovsky_fuel_kg,
     apply_dv_corrections,
-    gateway_round_trip_phasing,
-    GatewayPhasingDiagnostic,
+    round_trip_phasing,
+    RoundTripPhasingDiagnostic,
 )
 from .initial_guess import (
     get_initial_guess,
@@ -58,6 +60,6 @@ __all__ = [
     "nrho_to_llo", "llo_to_nrho", "TransferResult", "TransferSolverSettings",
     "circular_speed_ms", "doi_dv_ms", "circularisation_dv_ms",
     "phasing_dv_ms", "tsiolkovsky_fuel_kg", "apply_dv_corrections",
-    "gateway_round_trip_phasing", "GatewayPhasingDiagnostic",
+    "round_trip_phasing", "RoundTripPhasingDiagnostic",
     "get_initial_guess", "GuessResult", "GuessStrategy",
 ]

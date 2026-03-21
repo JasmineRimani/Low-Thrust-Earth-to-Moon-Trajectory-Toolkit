@@ -22,7 +22,7 @@ from src.cr3bp.frames import cr3bp_to_mci, mci_to_cr3bp, lvlh_basis_from_mci
 from src.cr3bp.mission_utils import (
     circular_speed_ms, doi_dv_ms, circularisation_dv_ms,
     phasing_dv_ms, tsiolkovsky_fuel_kg, apply_dv_corrections,
-    gateway_round_trip_phasing,
+    round_trip_phasing,
 )
 from src.cr3bp.nrho_llo_transfer import (
     nrho_to_llo, llo_to_nrho, TransferSolverSettings,
@@ -143,8 +143,8 @@ def test_apply_dv_corrections_basic():
     assert dv_extra > 0.0
 
 
-def test_gateway_phasing_fields():
-    diag = gateway_round_trip_phasing(
+def test_round_trip_phasing_fields():
+    diag = round_trip_phasing(
         departure_ta_nd=0.82,
         downleg_tof_s=3 * 86400,
         descent_tof_s=0.5 * 86400,

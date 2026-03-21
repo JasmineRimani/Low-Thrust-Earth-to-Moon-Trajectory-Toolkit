@@ -1,23 +1,21 @@
-# MAGNETO-Moon: Low-Thrust Earth-to-Moon Trajectory Analysis
+# Low-Thrust Earth-to-Moon Mission Analysis Toolkit
 
 Python implementation of a low-thrust trajectory propagator for electric-propulsion
 spacecraft transferring from GTO toward the Moon, with `scipy.optimize`
 weight tuning.
 
-Companion to the publication:
+This repository is a clean-room Python rewrite based on the public paper:
 
 > Rimani et al., *"MAGNETO: Electric Propulsion Tug for Lunar Cargo Delivery"*,
-> Acta Astronautica, 2021.
+> Acta Astronautica, DOI `10.1016/j.actaastro.2020.05.045`
 
 ---
 
-## What this code does
+## Scope
 
-Currently, the implemented and validated workflow focuses on the first transfer
-leg:
+Currently, the supported workflow focuses on the first transfer leg:
 
 - **GTO → Moon SOI** low-thrust propagation
-- **Moon-centred low-thrust approach propagation** with the same MEE framework
 - **Lyapunov control-weight optimisation** for the Earth-phase transfer
 
 This is built using:
@@ -29,9 +27,14 @@ This is built using:
 
 And optionally optimises the Lyapunov control weights with `scipy.optimize.differential_evolution`.
 
-The repository also contains CR3BP / NRHO research code under `src/cr3bp/`.
-That extension is still in progress: NRHO transfer support is not yet
-implemented as a supported end-to-end MAGNETO workflow.
+The repository also contains Moon-phase and CR3BP / NRHO extension code under
+`src/` and `src/cr3bp/`. That work is still in progress and is not yet treated
+as a supported end-to-end NRHO transfer workflow.
+
+## Provenance And Boundaries
+
+- This repository is intended to contain only a public-literature-inspired Python implementation.
+- Experimental NRHO extension code is kept for ongoing development, but it is not yet the supported product surface.
 
 ---
 
@@ -109,10 +112,11 @@ src/
   propagator.py         solve_ivp wrappers + mock ephemeris
   optimise.py           scipy.optimize weight tuner
   plotting.py           shared plotting helpers for example scripts
+  cr3bp/               experimental NRHO extension code
 examples/
-  mock_mission.py       Complete worked example (fictitious data)
+  mock_mission.py       Supported Earth-phase worked example
 tests/
-  test_magneto.py       15 pytest unit tests
+  test_magneto.py       Core propagation / perturbation / optimisation tests
 ```
 
 Example scripts save plots and summaries into `outputs/` so the repository root
@@ -120,6 +124,8 @@ stays tidy.
 
 The NRHO-related dynamics and transfer files are currently experimental extension
 work and should not be treated as a finished implemented feature yet.
+
+See [NOTICE.md](/home/jasmi/research_reputation/personal_github/MAGNETO_Core/NOTICE.md) for the repository cleanup intent and scope.
 
 ---
 
@@ -133,5 +139,6 @@ To use real JPL ephemerides, install `spiceypy`, load DE430 kernels, and pass a
 
 ## Note on mock data
 
-The example spacecraft ("Helios-1") uses **completely fictitious** geometry and
-mass properties. 
+The example spacecraft data used in the public examples is **completely
+fictitious**. No ESA, ESTEC, or proprietary vehicle data is intended to be
+included.

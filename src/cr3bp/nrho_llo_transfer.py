@@ -1,5 +1,5 @@
 """
-NRHO ↔ LLO transfer ΔV estimator — electric propulsion sizing grade.
+NRHO ↔ LLO transfer ΔV estimator for preliminary analysis.
 
 NRHO → LLO
 -----------
@@ -9,14 +9,13 @@ radius.  Scans departure epochs over one NRHO revolution and returns the minimum
 total ΔV solution.
 
 The ΔV values are *trajectory-geometry* quantities (independent of propulsion
-type).  Propellant mass is computed via the Tsiolkovsky equation using the
-caller-supplied Isp, which should be the **electric-propulsion Isp** throughout
-the MAGNETO tool chain.  No chemical propulsion is assumed or required.
+type). Propellant mass is computed via the Tsiolkovsky equation using the
+caller-supplied Isp.
 
 LLO → NRHO  (return leg)
 ------------------------
 The CR3BP equations of motion are time-reversible for free coast arcs.
-For sizing purposes the total ΔV magnitude is symmetric:
+For preliminary analysis the total ΔV magnitude is symmetric:
     ΔV(LLO→NRHO) ≈ ΔV(NRHO→LLO)
 The return leg reuses the down-leg periapsis scan.
 
@@ -47,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Solver settings dataclass  (replaces proprietary HLSTransferSolverSettings)
+# Solver settings dataclass
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -55,8 +54,8 @@ class TransferSolverSettings:
     """
     Numerical parameters for the NRHO ↔ LLO transfer scan.
 
-    All defaults are calibrated for the 9:2 NRHO → polar LLO transfer
-    at 100 km altitude (typical Gateway HLS geometry).
+    All defaults are calibrated for a 9:2 NRHO → polar LLO transfer
+    at roughly 100 km altitude.
     """
     # Departure-epoch scan
     n_ta_candidates:       int   = 20      # departure epochs to scan per revolution
@@ -90,7 +89,7 @@ class TransferSolverSettings:
 
 @dataclass
 class TransferResult:
-    """Output of a NRHO ↔ LLO transfer ΔV computation (EP sizing grade)."""
+    """Output of a NRHO ↔ LLO transfer ΔV computation."""
     dv_total:         float                   # total ΔV [m/s]
     dv1:              np.ndarray              # departure burn vector [m/s]
     dv2:              np.ndarray              # insertion burn vector [m/s]
@@ -233,7 +232,7 @@ def nrho_to_llo(
     g0: float = 9.80665,
 ) -> TransferResult:
     """
-    Compute NRHO → LLO transfer ΔV budget (EP sizing grade).
+    Compute NRHO → LLO transfer ΔV budget for preliminary analysis.
 
     The ΔV is a trajectory-geometry quantity.  Propellant mass is computed
     via Tsiolkovsky using the supplied **electric-propulsion Isp**.
@@ -347,7 +346,7 @@ def llo_to_nrho(
     g0: float = 9.80665,
 ) -> TransferResult:
     """
-    Compute LLO → NRHO transfer ΔV budget (EP sizing grade).
+    Compute LLO → NRHO transfer ΔV budget for preliminary analysis.
 
     By CR3BP time-reversibility ΔV(LLO→NRHO) ≈ ΔV(NRHO→LLO).
     Propellant mass is computed via Tsiolkovsky using the electric-propulsion Isp.

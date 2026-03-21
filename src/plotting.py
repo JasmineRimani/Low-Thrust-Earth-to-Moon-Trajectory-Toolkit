@@ -1,5 +1,5 @@
 """
-Shared plotting helpers for the MAGNETO example scripts.
+Shared plotting helpers for the public example scripts.
 
 These functions keep the examples focused on trajectory setup and reporting
 instead of repeating matplotlib boilerplate.

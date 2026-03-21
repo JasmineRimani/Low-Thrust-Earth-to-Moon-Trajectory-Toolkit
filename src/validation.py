@@ -1,5 +1,5 @@
 """
-Literature validation for MAGNETO trajectory outputs.
+Literature validation for trajectory-analysis outputs.
 
 Compares computed ΔV and transfer times against published benchmarks and
 reports pass/fail with percentage error.
@@ -15,11 +15,11 @@ References
        Acta Astronautica, 175, pp. 120–132.
        → 9:2 NRHO→100 km LLO two-impulse: ΔV ≈ 740–810 m/s for polar
 
-[H20]  NASA AAS 20-592, HLS Storable Propellant Study (2020).
+[H20]  NASA AAS 20-592 public NRHO/LLO transfer study (2020).
        → NRHO→100 km circular LLO nominal transit ≈ 12 h (fast end of range)
 
-[N08]  NASA Artemis NRHO chart (Merancy, 2023).
-       → NRHO to LLO: 900 m/s / 4 days (nominal Artemis HLS figure)
+[N08]  NASA public NRHO reference chart (Merancy, 2023).
+       → NRHO to LLO: 900 m/s / 4 days (nominal public reference figure)
 
 [M18]  McGuire, L. et al. (2017/2018), Low-thrust cis-lunar transfers,
        AAS 17-289 / AAS 18-236.
@@ -102,9 +102,9 @@ def validate_nrho_llo(
     # ΔV total  —————————————————————————————————————————————
     # [W18] Table 3: best two-burn for 9:2 NRHO→100 km polar LLO ≈ 750–900 m/s
     # [T20]: 740–810 m/s in high-fidelity model
-    # [N08] NASA Artemis nominal: 900 m/s
+    # [N08] NASA public nominal reference: 900 m/s
     # Literature values are trajectory-geometry ΔV regardless of propulsion type.
-    # Our CR3BP sizing-grade solver typically matches within ±15% of BVP optimal.
+    # Our CR3BP preliminary solver typically matches within ±15% of BVP optimal.
     checks.append(ValidationBound(
         name="NRHO↔LLO  ΔV total",
         value=dv_total_ms,
@@ -115,7 +115,7 @@ def validate_nrho_llo(
 
     # ΔV tight window (best-case two-impulse, CR3BP)
     # Whitley+2018 and Trofimov+2020 use full high-fidelity BVP optimisation.
-    # This solver uses sizing-grade periapsis targeting (Brent, no STM),
+    # This solver uses preliminary periapsis targeting (Brent, no STM),
     # which typically overestimates by 5–15% vs. optimal. Lower bound relaxed
     # accordingly; upper bound kept tight.
     checks.append(ValidationBound(
@@ -123,7 +123,7 @@ def validate_nrho_llo(
         value=dv_total_ms,
         lo=620.0, hi=950.0,
         unit="m/s",
-        reference="Whitley+2018 ~750-900; Trofimov+2020 740-810 (sizing-grade ±15%)",
+        reference="Whitley+2018 ~750-900; Trofimov+2020 740-810 (preliminary ±15%)",
     ))
 
     # Time-of-flight  ——————————————————————————————————————
@@ -134,7 +134,7 @@ def validate_nrho_llo(
         value=tof_days,
         lo=0.4, hi=7.0,
         unit="days",
-        reference="Whitley+2018 3-6 days; HLS AAS20-592 ~12h nominal",
+        reference="Whitley+2018 3-6 days; NASA AAS20-592 ~12h nominal",
     ))
 
     return checks

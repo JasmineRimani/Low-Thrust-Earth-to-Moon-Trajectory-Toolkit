@@ -1,5 +1,5 @@
 """
-Unit tests for the MAGNETO-Moon Python library.
+Unit tests for the core low-thrust mission-analysis library.
 Run with:  pytest tests/test_magneto.py -v
 """
 
