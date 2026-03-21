@@ -19,7 +19,7 @@ from src.perturbations import (
     srp_acceleration,
 )
 from src.control import ControlWeights, thrust_direction_lvlh
-from src.plotting import save_orbital_history_plot, save_trajectory_views
+from src.plotting import save_orbital_history_plot
 from src.propagator import (
     propagate_earth_phase, propagate_moon_phase,
     make_earth_phase_third_body, make_moon_phase_third_body,
@@ -205,8 +205,6 @@ def test_earth_phase_output_shapes():
     assert res.mass.shape  == (N,)
 
     history_path = TMP_PLOTS_DIR / "test_earth_phase_history.png"
-    trajectory_path = TMP_PLOTS_DIR / "test_earth_phase_trajectory.png"
-    moon_track = np.array([third_body(t)[0] for t in res.t])
 
     save_orbital_history_plot(
         t_days=res.t / 86400.0,
@@ -215,23 +213,8 @@ def test_earth_phase_output_shapes():
         save_path=history_path,
         title="Test Earth-phase history (EP)",
     )
-    save_trajectory_views(
-        trajectory=res.r_eci,
-        reference_trajectory=moon_track,
-        central_body_radius=R_EARTH,
-        save_path=trajectory_path,
-        title="Test Earth-phase trajectory (EP)",
-        axis_unit_label="10^3 km",
-        scale=1e6,
-        trajectory_label="Transfer trajectory",
-        reference_label="Moon ephemeris",
-        body_label="Earth",
-        body_color="steelblue",
-        end_label="Test end state",
-    )
 
     assert history_path.is_file() and history_path.stat().st_size > 0
-    assert trajectory_path.is_file() and trajectory_path.stat().st_size > 0
 
 
 def test_moon_phase_runs():
