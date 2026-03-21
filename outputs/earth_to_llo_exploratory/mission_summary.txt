@@ -1,0 +1,46 @@
+Exploratory Earth-to-LLO Mission Summary
+=======================================
+
+Earth phase
+-----------
+  Transfer time         : 400.0 days
+  Delta-V               : 861.5 m/s
+  Propellant used       : 21.4 kg
+  Final mass            : 378.6 kg
+  Target reached        : False
+  Stop reason           : time_limit_reached
+  Minimum Moon distance : 206278 km
+  Final Moon distance   : 323756 km
+
+──────────────────────────────────────────────────────────────────────
+  Validation: Earth-phase benchmark bounds
+──────────────────────────────────────────────────────────────────────
+  PASS ✓  EP GTO→Moon SOI  ΔV                       computed=   861.5 m/s  lit=[400, 2500] m/s  err=-40.6%  [Folta+2015 AAS15-302 (500-1500); McGuire+2018 (900-1500)]
+  PASS ✓  EP GTO→Moon SOI  transfer time            computed=   400.0 days  lit=[60, 500] days  err=+42.9%  [Folta+2015; McGuire+2018 150-200 days (40 kW SEP)]
+  → ALL PASS ✓  (2/2 checks)
+
+Moon phase
+----------
+  This leg is exploratory in the current public version.
+  It starts from a representative captured lunar ellipse, not from a
+  validated Earth-to-Moon SOI handoff state.
+  Initial perilune alt. : 300 km
+  Initial apolune alt.  : 20000 km
+  Target orbit altitude : 100 km circular
+  Simulated duration    : 10.0 days
+  Delta-V               : 91.5 m/s
+  Propellant used       : 2.2 kg
+  Target reached        : False
+  Stop reason           : time_limit_reached
+  Stable plotted prefix : 1470 samples (representative capture orbit)
+  Last plotted perilune : 75 km
+  Last plotted apolune  : 16251 km
+  Last plotted e        : 0.8169
+
+Notes
+-----
+  These plots are intended as a public exploratory workflow inspired by
+  the mission profile style of the paper, not as a validated reproduction
+  of a full end-to-end Earth-to-LLO trajectory.
+  The Earth-centred transfer plot uses the initial GTO-like orbit as
+  the black guide curve, to better match paper-style transfer figures.

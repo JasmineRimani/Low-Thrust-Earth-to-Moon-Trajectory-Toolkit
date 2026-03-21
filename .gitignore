@@ -17,5 +17,5 @@ env/
 .DS_Store
 
 # Example outputs
-outputs/
+# outputs/
 tmp_plots/
