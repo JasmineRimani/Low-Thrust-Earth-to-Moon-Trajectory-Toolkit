@@ -167,7 +167,8 @@ def round_trip_phasing(
     surface_duration_s : surface stay duration [s].
     ascent_tof_s       : surface→LLO ascent time [s].
     mission_period_s   : reference NRHO period [s].
-                         Defaults to canonical 9:2 value (6.5628 days).
+                         Defaults to the canonical 9:2 reference period from
+                         ``cr3bp_dynamics`` (~6.56 days).
     """
     from .cr3bp_dynamics import REFERENCE_92_PERIOD_S
     if mission_period_s is None:

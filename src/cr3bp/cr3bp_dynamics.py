@@ -30,12 +30,13 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # Earth-Moon mass parameter
-MU_M: float = 0.012150585609624      # Moon / (Earth + Moon)  [-]
-MU_E: float = 1.0 - MU_M            # Earth / (Earth + Moon) [-]
+_CHI_EM: float = 81.3005617547232   # Earth / Moon mass ratio  [-]
+MU_E: float = _CHI_EM / (_CHI_EM + 1.0)   # Earth / (Earth + Moon) [-]
+MU_M: float = 1.0 / (_CHI_EM + 1.0)       # Moon  / (Earth + Moon) [-]
 
 # Scale factors
 A_SCALE: float = 384_400_000.0       # Length unit [m]  (mean E-M distance)
-T_SCALE: float = 375_190.258         # Time unit   [s]  (1 / mean Moon motion)
+T_SCALE: float = 375_190.258892627   # Time unit   [s]  (1 / mean Moon motion)
 V_SCALE: float = A_SCALE / T_SCALE   # Velocity unit [m/s]
 
 # Moon physical parameters
@@ -54,30 +55,33 @@ OMEGA0_VEC: np.ndarray = np.array([0.0, 0.0, 1.0])
 # ---------------------------------------------------------------------------
 # 9:2 synodic-resonant NRHO reference orbit
 #
-# Reference state P_0_NRHO is at apolune (farthest point from Moon).
-# Period T_0_NRHO is computed numerically from this seed.
-#
-# These values are taken from published NRHO literature
-# (Zimovan-Spreen et al. 2020, Table 1; Capdevila 2014).
-# They are open-publication orbital mechanics data.
+# Gateway-style L2 southern NRHO used in the iDREAM2 mission-analysis data
+# layer. The reference state P_0_NRHO is the apolune y=0 Poincare-section
+# crossing (TA = 0), and the canonical period is the differential-corrected
+# orbit period used there. We still refine the period numerically below so the
+# state closes cleanly under this implementation's dynamics/integration setup.
+# Approximate geometry: rp ≈ 3230 km, ra ≈ 71 181 km.
+# References: Zimovan-Spreen et al. (2020); Davis et al. (2017).
 # ---------------------------------------------------------------------------
 
 P_0_NRHO: np.ndarray = np.array([
-    1.021881345465263,    # x  [CR3BP]
-    0.0,                  # y
-   -0.182096761524240,    # z
-    0.0,                  # vx
-   -0.103270459010000,    # vy
-    0.0,                  # vz
+    1.021903643744752,    # x   [CR3BP length]
+    0.0,                  # y   = 0 at the apolune symmetry section
+   -0.1820154177840952,   # z   [CR3BP length]
+    0.0,                  # vx  = 0 by symmetry
+   -0.1029994484711757,   # vy  [CR3BP velocity]
+    0.0,                  # vz  = 0 by symmetry
 ])
 
+# Canonical reference period from the shared iDREAM2 NRHO definition.
+REFERENCE_92_PERIOD_ND: float = 1.509557576597578  # [CR3BP time]
+
 # Approximate period — refined by numerical search below
-_T_0_NRHO_APPROX: float = 1.6323    # [CR3BP time]
+_T_0_NRHO_APPROX: float = REFERENCE_92_PERIOD_ND
 
 # Canonical reference period (9:2 synodic resonance)
-REFERENCE_92_PERIOD_DAYS: float = 6.5628  # [days]  from literature
-REFERENCE_92_PERIOD_S: float = REFERENCE_92_PERIOD_DAYS * 86400.0
-REFERENCE_92_PERIOD_ND: float = REFERENCE_92_PERIOD_S / T_SCALE
+REFERENCE_92_PERIOD_S: float = REFERENCE_92_PERIOD_ND * T_SCALE
+REFERENCE_92_PERIOD_DAYS: float = REFERENCE_92_PERIOD_S / 86400.0
 
 # ---------------------------------------------------------------------------
 # Integration step sizes  [CR3BP time]

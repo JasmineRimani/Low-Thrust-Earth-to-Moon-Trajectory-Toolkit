@@ -51,7 +51,7 @@ def test_jacobi_conserved_on_nrho():
 
 
 def test_nrho_period_reasonable():
-    """NRHO period should be roughly 1.6 CR3BP time units."""
+    """NRHO period should be roughly 1.5 CR3BP time units."""
     assert 1.4 < T_0_NRHO < 1.9
 
 
